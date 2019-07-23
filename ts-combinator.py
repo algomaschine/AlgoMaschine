@@ -86,7 +86,7 @@ aSignal_col = 3
 # model's parameters
 iPeriods = range(5,10,1) 	# period values for FDA & FA_AUC calculations
 FDA_threshold = 0.7
-group_sizes = [2,3,4,5,6,7,8,9]
+group_sizes = [1,2,3,4,5,6,7,8,9]
 
 
 # will need below data to fill MySQL table
@@ -419,12 +419,11 @@ def pnl_classic(model_infos):
 			max_dd_percent = 0 # initially we don't use that fot the sake of CPU resources
 
 		#print(filename, period, trades, pnl, max_dd_percent)
-		if p==0:
-			label = filename
-		else:
-			label =(filename.split(" ")[1]).replace("_export1.csv","") + "," # remove the big string on the left first
-			label += "p=" + str(period) + ","
-		label += "pnl_B=" + f'{pnl_b:.6f}'
+		label = filename
+		if period !=0:
+			label += ":" + str(period)
+
+		label += ",pnl_B=" + f'{pnl_b:.6f}'
 
 		pnl_adjusted = []
 		# adjust by the first close of the data series to make the Price and PnL curves start from the same value
@@ -492,7 +491,7 @@ def process_reports(ReportNames): # we probably should pass separately the array
 
 	# sig_fda_adjusted contains [model_name, period, [array of signals] ]
 	for r in sig_fda_adjusted:
-		filename = r[0]
+		filename = str(int(((r[0]).split(" ")[1]).replace("_export1.csv",""))-1000)
 		period = r[1]
 		''' doing like before
 		data_ohlcbs_a = data_ohlcbs[start_a:end_a]
@@ -591,7 +590,7 @@ def process_reports(ReportNames): # we probably should pass separately the array
 	print("TOP GROUP models with positive pnl_classic generated for A")
 	#print(top_b[cols_without_sig_array])
 	for index, row in top_ga[:1].iterrows(): # TODO: maybe we need MORE
-		chartz.append([row['PnL List'], "best group A(" + str(row['Label'].count(":")+1) + "): " + row['Label']])
+		chartz.append([row['PnL List'], "best group A(" + str(row['Label'].count(":")) + "): " + row['Label']])
 
 	top_b =  df_ab.sort_values(by=["PnL B"],ascending=False)[:MaxPoolForModelsGroup]
 	print("TOP models with positive pnl_classic generated for B")
